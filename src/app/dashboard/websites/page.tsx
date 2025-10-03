@@ -239,7 +239,8 @@ export default function WebsitesPage() {
                         Tracking Script
                       </div>
                       <div className="text-xs text-gray-600 mb-2">
-                        Add this script to your website's &lt;head&gt; section
+                        Add this script to your website&apos;s &lt;head&gt;
+                        section
                       </div>
                     </div>
                     <div className="bg-gray-900 text-gray-100 p-2 rounded text-xs font-mono overflow-x-auto">
@@ -330,8 +331,9 @@ export default function WebsitesPage() {
               Delete Website
             </h3>
             <p className="text-gray-600 mb-4">
-              Are you sure you want to delete "{deletingClient.name}"? This will
-              permanently remove all tracking data and cannot be undone.
+              Are you sure you want to delete &quot;{deletingClient.name}&quot;?
+              This will permanently remove all tracking data and cannot be
+              undone.
             </p>
             <div className="flex gap-2">
               <Button

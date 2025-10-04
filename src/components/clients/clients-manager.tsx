@@ -60,16 +60,7 @@ export function ClientsManager() {
 
   const handleCopyScript = (apiKey: string) => {
     const trackingScript = `<!-- BlurLeads Tracking Script -->
-<script>
-  (function() {
-    var script = document.createElement('script');
-    script.src = 'https://blurleads.com/tracker.js';
-    script.setAttribute('data-api-key', '${apiKey}');
-    script.setAttribute('data-api-url', 'https://api.blurleads.com');
-    script.async = true;
-    document.head.appendChild(script);
-  })();
-</script>`;
+      <script src="https://blurleads.com/tracker.js?id=${apiKey}" async></script> `;
 
     navigator.clipboard.writeText(trackingScript);
     toast.success('Tracking script copied to clipboard');

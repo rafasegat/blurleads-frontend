@@ -389,16 +389,7 @@ export default function SettingsPage(): JSX.Element {
                 <div className="relative">
                   <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
                     <code>{`<!-- BlurLeads Tracking Script -->
-<script>
-  (function() {
-    var script = document.createElement('script');
-    script.src = 'https://blurleads.com/tracker.js';
-    script.setAttribute('data-api-key', '${apiKey}');
-    script.setAttribute('data-api-url', 'https://api.blurleads.com');
-    script.async = true;
-    document.head.appendChild(script);
-  })();
-</script>`}</code>
+<script src="https://blurleads.com/tracker.js?id=${apiKey}" async></script>`}</code>
                   </pre>
                   <Button
                     size="sm"

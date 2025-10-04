@@ -5,16 +5,7 @@
  * for lead identification and enrichment.
  *
  * Usage:
- * <script>
- *   (function() {
- *     var script = document.createElement('script');
- *     script.src = 'https://blurleads.com/tracker.js';
- *     script.setAttribute('data-api-key', 'YOUR_API_KEY');
- *     script.setAttribute('data-api-url', 'https://api.blurleads.com');
- *     script.async = true;
- *     document.head.appendChild(script);
- *   })();
- * </script>
+ * <script src="https://blurleads.com/tracker.js?id=YOUR_API_KEY" async></script>
  */
 
 (function () {
@@ -24,16 +15,21 @@
 
   // Get configuration from script tag
   const currentScript =
-    document.currentScript || document.querySelector('script[data-api-key]');
+    document.currentScript ||
+    document.querySelector('script[src*="tracker.js"]');
   if (!currentScript) {
-    console.error('[BlurLeads] Could not find script tag with data-api-key');
+    console.error('[BlurLeads] Could not find script tag');
     return;
   }
 
+  // Extract API key from URL parameter
+  const scriptSrc = currentScript.src;
+  const urlParams = new URLSearchParams(scriptSrc.split('?')[1] || '');
+  const apiKey = urlParams.get('id');
+
   const CONFIG = {
-    apiKey: currentScript.getAttribute('data-api-key'),
-    apiUrl:
-      currentScript.getAttribute('data-api-url') || 'https://api.blurleads.com',
+    apiKey: apiKey,
+    apiUrl: 'https://api.blurleads.com',
   };
 
   if (!CONFIG.apiKey) {

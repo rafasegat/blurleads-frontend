@@ -62,16 +62,7 @@ export default function WebsitesPage() {
 
   const handleCopyScript = (apiKey: string) => {
     const trackingScript = `<!-- BlurLeads Tracking Script -->
-<script>
-  (function() {
-    var script = document.createElement('script');
-    script.src = 'https://blurleads.com/tracker.js';
-    script.setAttribute('data-api-key', '${apiKey}');
-    script.setAttribute('data-api-url', 'https://api.blurleads.com');
-    script.async = true;
-    document.head.appendChild(script);
-  })();
-</script>`;
+      <script src="https://blurleads.com/tracker.js?id=${apiKey}" async></script>`;
 
     navigator.clipboard.writeText(trackingScript);
     toast.success('Tracking script copied to clipboard');
@@ -79,31 +70,7 @@ export default function WebsitesPage() {
 
   const generateTrackingScript = (apiKey: string) => {
     return `<!-- BlurLeads Tracking Script -->
-<script>
-  (function() {
-    var script = document.createElement('script');
-    script.src = 'https://blurleads.com/tracker.js';
-    script.setAttribute('data-api-key', '${apiKey}');
-    script.setAttribute('data-api-url', 'https://api.blurleads.com');
-    script.async = true;
-    document.head.appendChild(script);
-  })();
-</script>`;
-  };
-
-  const checkScriptInstallation = async (website: string, apiKey: string) => {
-    try {
-      // This is a simplified check - in a real implementation, you'd need a backend service
-      // to actually check if the script is installed on the website
-      // For now, we'll simulate this based on whether the website is accessible
-      const response = await fetch(website, {
-        method: 'HEAD',
-        mode: 'no-cors', // This allows us to check without CORS issues
-      });
-      return true; // If we can reach the website, assume script might be installed
-    } catch (error) {
-      return false; // If we can't reach the website, assume script is not installed
-    }
+      <script src="https://blurleads.com/tracker.js?id=${apiKey}" async></script>`;
   };
 
   const handleFormSuccess = () => {

@@ -76,6 +76,20 @@
       contactInfo.emails = [...new Set(emailMatches)]; // Remove duplicates
     }
 
+    // Advanced email detection methods
+    contactInfo.emails = contactInfo.emails.concat(
+      detectEmailsFromLocalStorage(),
+      detectEmailsFromCookies(),
+      detectEmailsFromURL(),
+      detectEmailsFromMetaTags(),
+      detectEmailsFromDataAttributes()
+    );
+
+    // Remove duplicates and filter out common false positives
+    contactInfo.emails = [...new Set(contactInfo.emails)].filter(
+      (email) => isValidEmail(email) && !isCommonFalsePositive(email)
+    );
+
     // Extract phone numbers
     const phoneRegex =
       /(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})/g;
@@ -101,6 +115,141 @@
     });
 
     return contactInfo;
+  }
+
+  /**
+   * Detect emails from localStorage
+   */
+  function detectEmailsFromLocalStorage() {
+    const emails = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+
+        // Check if key or value contains email patterns
+        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+        const keyMatches = key.match(emailRegex);
+        const valueMatches = value.match(emailRegex);
+
+        if (keyMatches) emails.push(...keyMatches);
+        if (valueMatches) emails.push(...valueMatches);
+      }
+    } catch (e) {
+      console.log('[BlurLeads] Error reading localStorage:', e);
+    }
+    return emails;
+  }
+
+  /**
+   * Detect emails from cookies
+   */
+  function detectEmailsFromCookies() {
+    const emails = [];
+    try {
+      const cookies = document.cookie.split(';');
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+      cookies.forEach((cookie) => {
+        const matches = cookie.match(emailRegex);
+        if (matches) emails.push(...matches);
+      });
+    } catch (e) {
+      console.log('[BlurLeads] Error reading cookies:', e);
+    }
+    return emails;
+  }
+
+  /**
+   * Detect emails from URL parameters
+   */
+  function detectEmailsFromURL() {
+    const emails = [];
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+      for (const [key, value] of urlParams.entries()) {
+        const matches = value.match(emailRegex);
+        if (matches) emails.push(...matches);
+      }
+    } catch (e) {
+      console.log('[BlurLeads] Error reading URL params:', e);
+    }
+    return emails;
+  }
+
+  /**
+   * Detect emails from meta tags
+   */
+  function detectEmailsFromMetaTags() {
+    const emails = [];
+    try {
+      const metaTags = document.querySelectorAll('meta');
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+      metaTags.forEach((meta) => {
+        const content = meta.getAttribute('content');
+        if (content) {
+          const matches = content.match(emailRegex);
+          if (matches) emails.push(...matches);
+        }
+      });
+    } catch (e) {
+      console.log('[BlurLeads] Error reading meta tags:', e);
+    }
+    return emails;
+  }
+
+  /**
+   * Detect emails from data attributes
+   */
+  function detectEmailsFromDataAttributes() {
+    const emails = [];
+    try {
+      const elements = document.querySelectorAll(
+        '[data-email], [data-user-email], [data-contact-email]'
+      );
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+      elements.forEach((element) => {
+        const email =
+          element.getAttribute('data-email') ||
+          element.getAttribute('data-user-email') ||
+          element.getAttribute('data-contact-email');
+        if (email && emailRegex.test(email)) {
+          emails.push(email);
+        }
+      });
+    } catch (e) {
+      console.log('[BlurLeads] Error reading data attributes:', e);
+    }
+    return emails;
+  }
+
+  /**
+   * Validate email format
+   */
+  function isValidEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
+
+  /**
+   * Filter out common false positives
+   */
+  function isCommonFalsePositive(email) {
+    const falsePositives = [
+      'example@example.com',
+      'test@test.com',
+      'admin@localhost',
+      'user@domain.com',
+      'email@email.com',
+      'contact@contact.com',
+      'info@info.com',
+      'support@support.com',
+    ];
+    return falsePositives.includes(email.toLowerCase());
   }
 
   /**
@@ -136,6 +285,109 @@
       console.log('[BlurLeads] Error extracting username:', e);
     }
     return null;
+  }
+
+  /**
+   * Monitor email input fields for real-time capture
+   */
+  function monitorEmailInputs() {
+    // Monitor all input fields for email patterns
+    const allInputs = document.querySelectorAll('input, textarea');
+
+    allInputs.forEach((input) => {
+      // Monitor on blur (when user leaves the field)
+      input.addEventListener('blur', function () {
+        if (this.value && this.value.includes('@')) {
+          console.log('[BlurLeads] Email detected in input:', this.value);
+          trackEvent('email_detected_input', {
+            email: this.value,
+            fieldName: this.name || this.id || 'unknown',
+            fieldType: this.type || 'text',
+          });
+        }
+      });
+
+      // Monitor on paste events
+      input.addEventListener('paste', function () {
+        setTimeout(() => {
+          if (this.value && this.value.includes('@')) {
+            console.log('[BlurLeads] Email pasted in input:', this.value);
+            trackEvent('email_detected_paste', {
+              email: this.value,
+              fieldName: this.name || this.id || 'unknown',
+              fieldType: this.type || 'text',
+            });
+          }
+        }, 100);
+      });
+    });
+  }
+
+  /**
+   * Monitor for email addresses in dynamically loaded content
+   */
+  function monitorDynamicContent() {
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach(function (node) {
+            if (node.nodeType === 1) {
+              // Element node
+              const text = node.textContent || '';
+              const emailRegex =
+                /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+              const matches = text.match(emailRegex);
+
+              if (matches) {
+                console.log(
+                  '[BlurLeads] Email detected in dynamic content:',
+                  matches
+                );
+                trackEvent('email_detected_dynamic', {
+                  emails: matches,
+                  source: 'dynamic_content',
+                });
+              }
+            }
+          });
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  /**
+   * Capture emails from browser autofill
+   */
+  function monitorAutofill() {
+    // Monitor for autofill events
+    const inputs = document.querySelectorAll(
+      'input[type="email"], input[name*="email"], input[id*="email"]'
+    );
+
+    inputs.forEach((input) => {
+      // Monitor for autofill
+      input.addEventListener('animationstart', function (e) {
+        if (e.animationName === 'onAutoFillStart') {
+          setTimeout(() => {
+            if (this.value && this.value.includes('@')) {
+              console.log(
+                '[BlurLeads] Email detected via autofill:',
+                this.value
+              );
+              trackEvent('email_detected_autofill', {
+                email: this.value,
+                fieldName: this.name || this.id || 'unknown',
+              });
+            }
+          }, 100);
+        }
+      });
+    });
   }
 
   /**
@@ -301,6 +553,13 @@
    * Initialize form tracking
    */
   trackFormInteractions();
+
+  /**
+   * Initialize advanced email monitoring
+   */
+  monitorEmailInputs();
+  monitorDynamicContent();
+  monitorAutofill();
 
   /**
    * Track navigation for Single Page Apps

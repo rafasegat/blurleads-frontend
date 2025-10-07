@@ -465,24 +465,16 @@
    * Capture and send visitor data
    */
   function captureVisitor() {
-    const contactInfo = extractContactInfo();
-
     const visitorData = {
       pageUrl: window.location.href,
       referrer: document.referrer || null,
       userAgent: navigator.userAgent,
       sessionId: getSessionId(),
-      timestamp: new Date().toISOString(),
-      screenResolution: window.screen.width + 'x' + window.screen.height,
-      language: navigator.language,
-      timezone: getTimezone(),
-      contactInfo: contactInfo,
     };
 
     console.log('[BlurLeads] Tracking page view:', visitorData.pageUrl);
-    console.log('[BlurLeads] Contact info found:', contactInfo);
 
-    // Send to backend
+    // Send to backend (IP will be captured on backend)
     fetch(CONFIG.apiUrl + '/tracking/event', {
       method: 'POST',
       headers: {
@@ -554,12 +546,7 @@
    */
   trackFormInteractions();
 
-  /**
-   * Initialize advanced email monitoring
-   */
-  monitorEmailInputs();
-  monitorDynamicContent();
-  monitorAutofill();
+  // Contact monitoring removed - focusing on IP-based company identification
 
   /**
    * Track navigation for Single Page Apps
